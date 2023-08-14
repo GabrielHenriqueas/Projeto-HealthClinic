@@ -1,0 +1,52 @@
+-- DDL - Data Definition Language
+--Criar Banco de Dados
+CREATE DATABASE HealthClinic
+
+--Usar Banco de Dados
+USE HealthClinic
+
+--Criar Tabelas do Banco de Dados
+CREATE TABLE TiposDeUsuario
+(
+	IdTiposDeUsuario INT PRIMARY KEY IDENTITY,
+	Titulo VARCHAR(20) NOT NULL UNIQUE
+);
+
+CREATE TABLE Usuario
+(
+	IdUsuario INT PRIMARY KEY IDENTITY,
+	IdTiposDeUsuario INT FOREIGN KEY REFERENCES TiposDeUsuario(IdTiposDeUsuario) NOT NULL,
+	Email VARCHAR(20) NOT NULL UNIQUE,
+	Senha VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE Especialidade
+(
+	IdEspecialidade INT PRIMARY KEY IDENTITY,
+	Titulo VARCHAR(20) NOT NULL UNIQUE
+);
+
+CREATE TABLE Clinica
+(
+	IdClinica INT PRIMARY KEY IDENTITY,
+	NomeFantasia VARCHAR(20) NOT NULL,
+	CNPJ VARCHAR(20) NOT NULL UNIQUE,
+	RazaoSocial VARCHAR(20) NOT NULL UNIQUE,
+	HoraAbertura VARCHAR(20) NOT NULL,
+	HoraFechamento VARCHAR(20) NOT NULL,
+	Endereco VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE Paciente
+(
+	IdPaciente INT PRIMARY KEY IDENTITY,
+	IdUsuario INT FOREIGN KEY REFERENCES Usuario(IdUsuario) NOT NULL,
+	Nome VARCHAR(20) NOT NULL,
+	DataNascimento VARCHAR(20) NOT NULL,
+	Telefone VARCHAR(20) NOT NULL UNIQUE,
+	RG VARCHAR(20) NOT NULL UNIQUE,
+	CPF VARCHAR(20) NOT NULL UNIQUE,
+	CEP VARCHAR(20) NOT NULL,
+	Endereco VARCHAR(20) NOT NULL UNIQUE
+
+);
