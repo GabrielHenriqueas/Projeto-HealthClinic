@@ -1,5 +1,8 @@
 --DQL - Data Query Language
 
+--Usar Banco de Dados
+USE HealthClinic
+
 SELECT * FROM TiposDeUsuario
 SELECT * FROM Especialidade
 SELECT * FROM Clinica
@@ -9,22 +12,7 @@ SELECT * FROM Medico
 SELECT * FROM Consulta
 SELECT * FROM FeedBack
 
-/*
-SELECT
-	Usuario.Nome AS [Nome do Usuário],
-	TiposDeUsuario.TituloTipoUsuario AS [Tipo do Usuário],
-	Evento.DataEvento AS [Data do Evento],
-	Evento.HorarioEvento AS [Horário do Evento],
-	CONCAT (Instituicao.NomeFantasia, ' - ', Instituicao.Endereco) AS [Endereço],
-	TiposDeEvento.TituloTipoEvento AS [Tipo de Evento],
-	Evento.Nome AS [Nome do Evento],
-	Evento.Descricao AS [Descrição do evento],
-	CASE WHEN PresencasEventos.Situacao = 1 THEN 'CONFIRMADO' ELSE 'NÃO CONFIRMADO' END AS [Presença],
-	ComentarioEvento.Descricao AS [Cometário]
-*/
-
 --Criar script que exiba os seguintes dados:
-
 	-- Id Consulta
 	-- Data da Consulta
 	-- Horario da Consulta
@@ -36,31 +24,53 @@ SELECT
 	-- Prontuário ou Descricao
 	-- FeedBack(Comentario da consulta)
 
-USE HealthClinic
-
 SELECT
 	Consulta.IdConsulta,
 	Consulta.DataConsulta,
 	Consulta.HorarioConsulta,
 	Clinica.NomeFantasia,
-	Usuario.IdTiposDeUsuario [Nome Paciente],
-	Usuario.IdTiposDeUsuario [Nome Medico],
+	P.Nome AS Paciente,
+	M.Nome AS Medico,
 	Especialidade.Titulo,
 	Medico.CRM,
 	Consulta.Descricao,
-	FeedBack.Descricao
+	FeedBack.Comentario
 
-FROM Medico
-	inner join Clinica ON Clinica.IdClinica = Medico.IdClinica
-	inner join Consulta ON Medico.IdMedico = Consulta.IdConsulta
-	inner join Paciente ON Paciente.IdPaciente = Consulta.IdPaciente
-	inner join Usuario ON Usuario.IdUsuario = Medico.IdMedico
-	inner join Especilidade ON Especialidade.IdEspecialidade = Medico.IdEspecialidade
-	left join FeedBack ON FeedBack.IdConsulta = Consulta.IdConsulta
+FROM Consulta
+	INNER JOIN Medico ON Consulta.IdConsulta = Medico.IdMedico
+	INNER JOIN Especialidade ON Especialidade.IdEspecialidade = Medico.IdEspecialidade
+	INNER JOIN Clinica ON Clinica.IdClinica = Medico.IdClinica
+	INNER JOIN FeedBack ON FeedBack.IdConsulta = Consulta.IdConsulta
+	INNER JOIN Paciente ON Paciente.IdPaciente = Consulta.IdPaciente
+	INNER JOIN Usuario M ON Medico.IdUsuario = M.IdUsuario
+	INNER JOIN Usuario P ON Paciente.IdUsuario = P.IdUsuario
 
 --Criar função para retornar a quantidade de médicos de uma determinada especialidade
+/*
+create function BuscaMedico
+	
+	@Especialidade varchar(50)
+
+returns table
+as
+return
+(
+	select
+		M.Nome as Médico, 
+		Especialidade.Titulo as Especialidade
+	
+	from Especialidade
+	inner join Medico on Medico.IdEspecialidade = Especialidade.IdEspecialidade
+	inner join Usuario as MedicoUsuario on Medico.IdUsuario = Usuario.IdUsuario
+	where Especialidade.Titulo = @Especialidade
+);
+
+select * from BuscaMedico ('Urologia');
+select * from BuscaMedico ('Cardiologia');
+
 SELECT COUNT(IdMedico) AS [Numero de Medicos] FROM Medico
-WHERE Medico.Especialidade = 'Cardiologista'
+WHERE Especialidade.IdEspecialidade = Medico.IdEspecialidade AND Especialidade.Titulo = 'Cardiologista'
+*/
 
 --Criar procedure para retornar a idade de um determinado usuário específico
 GO
@@ -68,25 +78,7 @@ CREATE PROCEDURE BuscaIdade
 @BuscaIdade VARCHAR(20)
 AS
 SELECT Paciente.Idade FROM Paciente
-SELECT Usuario.NomeUsuario FROM Usuario
-WHERE @BuscaIdade = Usuario.NomeUsuario
+SELECT Usuario.Nome FROM Usuario
+WHERE @BuscaIdade = Usuario.Nome
 
-execute BuscaIdade 'Bona';
-
-drop procedure BuscaIdade
-
-/*
-FROM Evento
-	INNER JOIN TiposDeEvento
-	ON Evento.IdTipoDeEvento = TiposDeEvento.IdTipoDeEvento
-	INNER JOIN Instituicao
-	ON Evento.IdInstituicao = Instituicao.IdInstituicao
-	INNER JOIN PresencasEventos
-	ON Evento.IdEvento = PresencasEventos.IdEvento
-	INNER JOIN Usuario
-	ON Usuario.IdUsuario = PresencasEventos.IdUsuario
-	INNER JOIN TiposDeUsuario
-	ON TiposDeUsuario.IdTipoDeUsuario = Usuario.IdTipoDeUsuario
-	LEFT JOIN ComentarioEvento
-	ON ComentarioEvento.IdUsuario = Usuario.IdUsuario
-*/
+EXECUTE BuscaIdade 'Carlos Costa';
